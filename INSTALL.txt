@@ -1,0 +1,16 @@
+Synthe · AFTERHOURS - installation (Mac)
+
+Nemmest: dobbeltklik på install.command (den beder om din adgangskode).
+
+Eller manuelt:
+1. Luk Ableton Live.
+2. Kopier Synthe.vst3 til:       /Library/Audio/Plug-Ins/VST3/
+   Kopier Synthe.component til:  /Library/Audio/Plug-Ins/Components/
+3. Pluginnet er ikke signeret af Apple, så macOS kan blokere det. Åbn Terminal og kør:
+     sudo xattr -cr /Library/Audio/Plug-Ins/VST3/Synthe.vst3
+     sudo xattr -cr /Library/Audio/Plug-Ins/Components/Synthe.component
+4. Ableton > Settings > Plug-Ins: slå "Use VST3 Plug-in System Folders" og "Use Audio Units v2" til og tryk "Rescan".
+5. Find "Synthe" under Plug-Ins > AFTERHOURS.
+
+Brug: spil MIDI. MONO giver glidende leads. OKT flytter alt op eller ned i oktaver.
+PUMP og GLITCH følger Abletons beat, når projektet spiller (GLITCH virker også, mens du holder toner).

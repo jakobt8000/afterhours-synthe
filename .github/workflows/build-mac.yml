@@ -1,0 +1,44 @@
+name: Build Mac plugin
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build-mac:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure
+        run: cmake -S . -B build -G Xcode
+
+      - name: Build VST3 and AU (universal, Apple Silicon and Intel)
+        run: cmake --build build --config Release --target Synthe_VST3 Synthe_AU -- -quiet
+
+      - name: Sign (ad-hoc) and package
+        run: |
+          ART=build/Synthe_artefacts/Release
+          mkdir -p SYNTHE
+          cp -R "$ART/VST3/Synthe.vst3" SYNTHE/
+          cp -R "$ART/AU/Synthe.component" SYNTHE/
+          codesign --force --deep --sign - SYNTHE/Synthe.vst3
+          codesign --force --deep --sign - SYNTHE/Synthe.component
+          lipo -info SYNTHE/Synthe.vst3/Contents/MacOS/Synthe
+          cp INSTALL.txt install.command SYNTHE/
+          chmod +x SYNTHE/install.command
+          ditto -c -k --keepParent SYNTHE Synthe-mac.zip
+
+      - name: Validate AU with Apple's auval
+        continue-on-error: true
+        run: |
+          mkdir -p ~/Library/Audio/Plug-Ins/Components
+          cp -R SYNTHE/Synthe.component ~/Library/Audio/Plug-Ins/Components/
+          killall -9 AudioComponentRegistrar || true
+          sleep 2
+          auval -v aumu Asyn Afhr
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Synthe-mac
+          path: Synthe-mac.zip
